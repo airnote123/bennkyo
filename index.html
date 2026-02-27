@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusPlay Pro</title>
+    <style>
+        :root {
+            --bg: #020617;
+            --card-bg: #0f172a;
+            --primary: #6366f1;
+            --secondary: #10b981;
+            --accent: #f43f5e;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: var(--card-bg);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            border-left: 1px solid #1e293b;
+            border-right: 1px solid #1e293b;
+        }
+
+        /* Header */
+        header {
+            padding: 30px 20px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            text-align: center;
+            position: relative;
+            border-bottom: 1px solid #1e293b;
+        }
+
+        .settings-btn {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            background: #1e293b;
+            border: none;
+            color: var(--text-dim);
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .points-display {
+            font-size: 48px;
+            font-weight: 900;
+            margin: 10px 0;
+        }
+
+        .points-unit {
+            font-size: 18px;
+            color: var(--text-dim);
+            margin-left: 5px;
+        }
+
+        .message {
+            font-size: 12px;
+            color: var(--primary);
+            height: 16px;
+        }
+
+        /* Video Section */
+        .video-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #player-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 20px;
+            flex-grow: 1;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        select, input, textarea {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            font-family: monospace;
+            height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 800;
+            font-size: 14px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn-study { background: var(--secondary); color: white; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2); }
+        .btn-list { background: #334155; color: var(--text); margin-top: 15px; }
+        .btn-save { background: var(--primary); color: white; margin-top: 20px; }
+        .btn-danger { background: var(--accent); color: white; margin-top: 10px; }
+
+        /* Settings View */
+        .view { display: none; }
+        .view.active { display: block; }
+
+        .setting-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .setting-row label { flex-grow: 1; font-size: 14px; }
+        .setting-row input { width: 80px; text-align: center; }
+
+        /* List View */
+        .video-item {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .video-info { flex-grow: 1; cursor: pointer; }
+        .video-title { font-size: 14px; font-weight: bold; }
+        .video-url { font-size: 10px; color: var(--text-dim); }
+        .delete-btn { color: var(--accent); background: none; border: none; padding: 5px; cursor: pointer; }
+
+        footer {
+            padding: 20px;
+            font-size: 10px;
+            color: var(--text-dim);
+            text-align: center;
+            border-top: 1px solid #1e293b;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: var(--text-dim);
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <header>
+        <button class="settings-btn" onclick="toggleView('settings')">⚙️</button>
+        <div style="font-size: 10px; font-weight: bold; color: var(--primary); letter-spacing: 2px;">FOCUS POWER</div>
+        <div class="points-display"><span id="points">0</span><span class="points-unit">pt</span></div>
+        <div id="status-msg" class="message"></div>
+    </header>
+
+    <div class="video-container" id="video-area">
+        <div id="player-placeholder">
+            <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
+            <div id="lock-msg" style="font-size: 12px; color: var(--text-dim);">勉強してロックを解除</div>
+        </div>
+    </div>
+
+    <!-- MAIN VIEW -->
+    <div id="view-main" class="view active content">
+        <div class="section-title">📖 学習を記録する</div>
+        <div class="grid-2">
+            <div>
+                <label style="font-size: 10px; color: var(--text-dim); margin-left: 5px;">レベル</label>
+                <select id="level-select"></select>
+            </div>
+            <div>
+                <label style="font-size: 10px; color: var(--text-dim); margin-left: 5px;">問題数</label>
+                <input type="number" id="study-count" value="1">
+            </div>
+        </div>
+        <button class="btn btn-study" onclick="addPoints()">学習完了！</button>
+        
+        <button class="btn btn-list" onclick="toggleView('list')">📜 プレイリストを開く</button>
+    </div>
+
+    <!-- SETTINGS VIEW -->
+    <div id="view-settings" class="view content">
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchSettingsTab('rule')">ルール</button>
+            <button class="tab-btn" onclick="switchSettingsTab('data')">データ管理</button>
+        </div>
+
+        <!-- Rule Tab -->
+        <div id="settings-tab-rule">
+            <div class="section-title">⚙️ ルール設定</div>
+            <div id="level-settings"></div>
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
+            <div class="section-title">⏱️ 交換レート</div>
+            <div class="setting-row">
+                <input type="number" id="set-req-pt" style="width: 100px;">
+                <label>pt で</label>
+                <input type="number" id="set-req-min" style="width: 80px;">
+                <label>分間 視聴</label>
+            </div>
+        </div>
+
+        <!-- Data Tab -->
+        <div id="settings-tab-data" style="display:none;">
+            <div class="section-title">💾 バックアップ・移行</div>
+            <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 10px;">このJSONコードを保存することでデータをバックアップできます。</p>
+            <textarea id="json-io-area" placeholder="ここにJSONを貼り付けてインポート"></textarea>
+            <div class="grid-2" style="margin-top: 10px;">
+                <button class="btn" style="background: #334155; color: white; padding: 10px;" onclick="exportJSON()">エクスポート</button>
+                <button class="btn" style="background: #334155; color: white; padding: 10px;" onclick="copyJSON()">コードをコピー</button>
+            </div>
+            <button class="btn btn-save" style="margin-top: 10px;" onclick="importJSON()">JSONを読み込む</button>
+            <button class="btn btn-danger" onclick="resetAllData()">全データをリセット</button>
+        </div>
+        
+        <button class="btn btn-save" onclick="saveConfig()">戻る</button>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div id="view-list" class="view content">
+        <div class="section-title">📜 プレイリスト</div>
+        <div style="background: #1e293b; padding: 15px; border-radius: 12px; margin-bottom: 20px;">
+            <input type="text" id="new-title" placeholder="動画のタイトル" style="margin-bottom: 10px;">
+            <input type="text" id="new-url" placeholder="YouTube URL">
+            <button class="btn btn-save" style="margin-top: 10px; padding: 10px;" onclick="addVideo()">追加</button>
+        </div>
+        <div id="video-list-items"></div>
+        <button class="btn btn-list" onclick="toggleView('main')">戻る</button>
+    </div>
+
+    <footer>
+        再生中はポイントがリアルタイムで減少します。<br>
+        0ptになると自動で停止します。
+    </footer>
+</div>
+
+<script>
+    // --- Data Management ---
+    const DEFAULT_STATE = {
+        points: 0,
+        isPlaying: false,
+        config: {
+            levels: [
+                { label: "レベル1", reward: 10 },
+                { label: "レベル2", reward: 20 },
+                { label: "レベル3", reward: 50 },
+                { label: "レベル4", reward: 100 },
+                { label: "レベル5", reward: 200 }
+            ],
+            reqPt: 300,
+            reqMin: 5,
+            minUnlock: 50
+        },
+        videos: [
+            { title: "集中用BGM", url: "https://www.youtube.com/watch?v=jfKfPfyJRdk" }
+        ]
+    };
+
+    let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+    // Load from LocalStorage
+    const savedState = localStorage.getItem('focusPlayState');
+    if (savedState) {
+        try {
+            state = JSON.parse(savedState);
+            // 状態が再生中のまま保存されていた場合の安全策
+            state.isPlaying = false; 
+        } catch (e) {
+            console.error("Failed to parse state", e);
+        }
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('focusPlayState', JSON.stringify(state));
+    }
+
+    // --- UI Logic ---
+    function toggleView(viewName) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        const targetView = document.getElementById('view-' + viewName);
+        if (targetView) targetView.classList.add('active');
+        
+        if (viewName === 'settings') {
+            switchSettingsTab('rule');
+            renderSettings();
+        }
+        if (viewName === 'list') renderList();
+    }
+
+    function switchSettingsTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('settings-tab-rule').style.display = 'none';
+        document.getElementById('settings-tab-data').style.display = 'none';
+        
+        if (tab === 'rule') {
+            document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+            document.getElementById('settings-tab-rule').style.display = 'block';
+        } else {
+            document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+            document.getElementById('settings-tab-data').style.display = 'block';
+        }
+    }
+
+    function renderPoints() {
+        const pointsEl = document.getElementById('points');
+        if (pointsEl) {
+            pointsEl.innerText = Math.floor(state.points);
+        }
+        
+        const lockMsg = document.getElementById('lock-msg');
+        if (lockMsg && !state.isPlaying) {
+            if (state.points < state.config.minUnlock) {
+                lockMsg.innerText = `${state.config.minUnlock}pt以上で解除（あと${Math.ceil(state.config.minUnlock - state.points)}pt）`;
+            } else {
+                lockMsg.innerText = "動画を選択して再生";
+            }
+        }
+    }
+
+    function renderStudyForm() {
+        const select = document.getElementById('level-select');
+        if (select) {
+            select.innerHTML = state.config.levels.map((l, i) => 
+                `<option value="${i}">${l.label} (${l.reward}pt)</option>`
+            ).join('');
+        }
+    }
+
+    function addPoints() {
+        const select = document.getElementById('level-select');
+        const countInput = document.getElementById('study-count');
+        const statusMsg = document.getElementById('status-msg');
+        
+        if (!select || !countInput) return;
+        
+        const idx = select.value;
+        const count = parseInt(countInput.value) || 1;
+        const earned = (state.config.levels[idx]?.reward || 0) * count;
+        state.points += earned;
+        
+        if (statusMsg) {
+            statusMsg.innerText = `${earned}pt 獲得しました！`;
+            setTimeout(() => statusMsg.innerText = '', 3000);
+        }
+        renderPoints();
+        saveToStorage();
+    }
+
+    // --- JSON I/O Logic ---
+    function exportJSON() {
+        const area = document.getElementById('json-io-area');
+        area.value = JSON.stringify(state, null, 2);
+    }
+
+    function copyJSON() {
+        const area = document.getElementById('json-io-area');
+        if (!area.value) exportJSON();
+        area.select();
+        document.execCommand('copy');
+        alert("JSONコードをクリップボードにコピーしました！");
+    }
+
+    function importJSON() {
+        const area = document.getElementById('json-io-area');
+        try {
+            const imported = JSON.parse(area.value);
+            // 簡単なバリデーション
+            if (!imported.config || !imported.videos) throw new Error("不正なデータ形式です");
+            
+            state = imported;
+            state.isPlaying = false; // インポート時は再生停止
+            saveToStorage();
+            renderPoints();
+            renderStudyForm();
+            alert("データを正常にインポートしました。");
+            toggleView('main');
+        } catch (e) {
+            alert("インポートに失敗しました: " + e.message);
+        }
+    }
+
+    function resetAllData() {
+        if (confirm("すべてのポイント、設定、プレイリストを削除します。よろしいですか？")) {
+            state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            saveToStorage();
+            renderPoints();
+            renderStudyForm();
+            alert("データを初期化しました。");
+            toggleView('main');
+        }
+    }
+
+    // --- Video Logic ---
+    let drainInterval;
+    function playVideo(url) {
+        if (state.points < state.config.minUnlock) {
+            alert("ポイントが足りません！");
+            return;
+        }
+
+        const videoId = extractId(url);
+        if (!videoId) {
+            alert("有効なYouTube URLを入力してください。");
+            return;
+        }
+
+        const costPerSec = state.config.reqPt / (state.config.reqMin * 60);
+        
+        const area = document.getElementById('video-area');
+        if (area) {
+            area.innerHTML = `<iframe id="yt-player" src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+        }
+        
+        state.isPlaying = true;
+        clearInterval(drainInterval);
+        drainInterval = setInterval(() => {
+            state.points -= costPerSec;
+            if (state.points <= 0) {
+                state.points = 0;
+                stopVideo();
+            }
+            renderPoints();
+        }, 1000);
+        
+        toggleView('main');
+    }
+
+    function stopVideo() {
+        state.isPlaying = false;
+        clearInterval(drainInterval);
+        const area = document.getElementById('video-area');
+        if (area) {
+            area.innerHTML = `
+                <div id="player-placeholder">
+                    <div style="font-size: 40px; margin-bottom: 10px;">🔒</div>
+                    <div id="lock-msg" style="font-size: 12px; color: var(--text-dim);">ポイント切れです</div>
+                </div>`;
+        }
+        renderPoints();
+        saveToStorage();
+    }
+
+    function extractId(url) {
+        if (!url) return null;
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    // --- Settings & List Rendering ---
+    function renderSettings() {
+        const container = document.getElementById('level-settings');
+        if (container) {
+            container.innerHTML = state.config.levels.map((l, i) => `
+                <div class="setting-row">
+                    <label>レベル${i+1}名</label>
+                    <input type="text" id="edit-lbl-${i}" value="${l.label}" style="width:100px">
+                    <input type="number" id="edit-rw-${i}" value="${l.reward}">
+                    <span style="font-size:10px">pt</span>
+                </div>
+            `).join('');
+        }
+        const reqPtEl = document.getElementById('set-req-pt');
+        const reqMinEl = document.getElementById('set-req-min');
+        if (reqPtEl) reqPtEl.value = state.config.reqPt;
+        if (reqMinEl) reqMinEl.value = state.config.reqMin;
+    }
+
+    function saveConfig() {
+        // 設定タブの内容のみ保存
+        const configTab = document.getElementById('settings-tab-rule');
+        if (configTab.style.display !== 'none') {
+            state.config.levels = state.config.levels.map((l, i) => ({
+                label: document.getElementById(`edit-lbl-${i}`)?.value || l.label,
+                reward: parseInt(document.getElementById(`edit-rw-${i}`)?.value) || 0
+            }));
+            const reqPtInput = document.getElementById('set-req-pt');
+            const reqMinInput = document.getElementById('set-req-min');
+            
+            if (reqPtInput) state.config.reqPt = parseInt(reqPtInput.value) || 1;
+            if (reqMinInput) state.config.reqMin = parseInt(reqMinInput.value) || 1;
+        }
+        
+        saveToStorage();
+        renderStudyForm();
+        toggleView('main');
+    }
+
+    function renderList() {
+        const container = document.getElementById('video-list-items');
+        if (container) {
+            container.innerHTML = state.videos.map((v, i) => `
+                <div class="video-item">
+                    <div class="video-info" onclick="playVideo('${v.url}')">
+                        <div class="video-title">${v.title}</div>
+                        <div class="video-url">${v.url}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteVideo(${i})">🗑️</button>
+                </div>
+            `).join('');
+        }
+    }
+
+    function addVideo() {
+        const titleEl = document.getElementById('new-title');
+        const urlEl = document.getElementById('new-url');
+        if (!titleEl || !urlEl) return;
+        
+        const title = titleEl.value;
+        const url = urlEl.value;
+        if (title && url) {
+            state.videos.push({ title, url });
+            titleEl.value = '';
+            urlEl.value = '';
+            renderList();
+            saveToStorage();
+        }
+    }
+
+    function deleteVideo(i) {
+        state.videos.splice(i, 1);
+        renderList();
+        saveToStorage();
+    }
+
+    // 初期化
+    window.onload = () => {
+        renderPoints();
+        renderStudyForm();
+    };
+</script>
+
+</body>
+</html>
