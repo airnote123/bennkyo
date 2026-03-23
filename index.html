@@ -33,10 +33,10 @@
 
         .calculator {
             width: 320px;
-            height: 550px;
+            height: 570px;
             background-color: var(--bg-color);
             border-radius: 12px;
-            padding: 20px;
+            padding: 16px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.1);
             display: flex;
             flex-direction: column;
@@ -80,7 +80,7 @@
         .solar-cell { flex: 1; border-right: 1px solid #111; }
         .solar-text { font-size: 0.4rem; color: #665; letter-spacing: 0.5px; margin-top: 2px; }
 
-        .display-frame { background-color: #0c0d0d; padding: 12px; border-radius: 6px; margin-bottom: 5px; }
+        .display-frame { background-color: #0c0d0d; padding: 12px; border-radius: 6px; }
         .lcd-screen {
             background-color: var(--lcd-bg);
             height: 85px;
@@ -89,7 +89,7 @@
             display: flex;
             align-items: center;
             justify-content: flex-end;
-            padding: 5px 40px 5px 10px;
+            padding: 5px 35px 5px 10px;
             position: relative;
             overflow: hidden;
             font-family: 'Orbitron', sans-serif;
@@ -109,7 +109,7 @@
         }
 
         .lcd-main-val { 
-            font-size: 3.2rem;
+            font-size: 3rem;
             letter-spacing: -2px;
             line-height: 1;
             text-align: right;
@@ -135,29 +135,29 @@
             margin: 2px 0;
         }
         .frac-num, .frac-den { 
-            font-size: 1.3rem; 
-            min-width: 24px; 
+            font-size: 1.2rem; 
+            min-width: 20px; 
             text-align: center; 
             line-height: 1;
         }
-        .frac-whole { font-size: 3.2rem; margin-right: 6px; }
+        .frac-whole { font-size: 3rem; margin-right: 6px; }
 
-        /* 液晶内の演算子位置 */
         .op-symbol {
             position: absolute;
-            right: 12px;
+            right: 10px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: bold;
             width: 20px;
             text-align: center;
         }
 
+        /* 5列グリッドで構成し、中央の数字列を調整 */
         .grid-container { 
             display: grid; 
-            grid-template-columns: repeat(5, 1fr); /* 5列に修正して右端を揃える */
-            gap: 7px; 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 8px 6px; 
             flex-grow: 1; 
         }
 
@@ -168,7 +168,7 @@
             justify-content: center;
             align-items: center;
             color: white;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             cursor: pointer;
             box-shadow: 0 2px 0 #000;
@@ -178,13 +178,20 @@
         .btn-orange { background-color: var(--orange-btn); }
         .btn-blue { background-color: var(--blue-btn); }
         .btn-grey { background-color: var(--grey-btn); }
-        .btn-dark { background-color: var(--dark-grey-btn); }
+        .btn-dark { background-color: var(--dark-grey-btn); font-size: 1.1rem; }
         .btn-red { background-color: var(--red-btn); }
         .btn-ac { background-color: var(--ac-btn); }
 
         .label-jp { font-size: 0.65rem; letter-spacing: -0.5px; font-weight: bold; }
-        .label-xs { font-size: 0.6rem; }
-        .span-2 { grid-column: span 2; }
+        .label-xs { font-size: 0.55rem; }
+        
+        /* 数字ボタンの横幅を調整するためのヘルパークラス */
+        .col-span-1 { grid-column: span 1; }
+        .col-span-2 { grid-column: span 2; }
+        
+        /* 1段目と2段目（上部のオレンジボタン群）は等間隔に配置するため、個別に定義 */
+        .top-row { grid-column: span 5; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+
     </style>
 </head>
 <body>
@@ -210,55 +217,62 @@
             </div>
         </div>
 
-        <!-- 5列構成で演算子を一番右の列に統一 -->
+        <!-- 5列をベースに調整 -->
         <div class="grid-container">
-            <!-- 1段目 -->
-            <div class="btn btn-orange label-xs" onclick="fn('inv')">1/x</div>
-            <div class="btn btn-orange label-xs" onclick="fn('sq')">x²</div>
-            <div class="btn btn-orange" onclick="num('(')">(</div>
-            <div class="btn btn-orange" onclick="num(')')">)</div>
-            <div class="btn btn-orange label-xs" onclick="fn('pow')">x<sup>y</sup></div>
+            <!-- 1段目: 6個並ぶので個別のコンテナ -->
+            <div class="top-row">
+                <div class="btn btn-orange label-xs" onclick="fn('inv')">1/x</div>
+                <div class="btn btn-orange label-xs" onclick="fn('sq')">x²</div>
+                <div class="btn btn-orange" onclick="num('(')">(</div>
+                <div class="btn btn-orange" onclick="num(')')">)</div>
+                <div class="btn btn-orange label-xs" onclick="fn('pow')">x<sup>y</sup></div>
+                <div class="btn btn-orange" onclick="fn('pi')">π</div>
+            </div>
 
-            <!-- 2段目 -->
-            <div class="btn btn-orange label-xs" onclick="fn('pm')">+/-</div>
-            <div class="btn btn-orange label-jp" onclick="fracAction('to')">と</div>
-            <div class="btn btn-orange label-jp" onclick="fracAction('bunnno')">分の</div>
-            <div class="btn btn-orange label-jp" onclick="fracAction('shosuu')">分小</div>
-            <div class="btn btn-orange label-jp" onclick="fracAction('taikari')">帯仮</div>
+            <!-- 2段目: 同上 -->
+            <div class="top-row">
+                <div class="btn btn-orange label-xs" onclick="fn('pm')">+/-</div>
+                <div class="btn btn-orange label-jp" onclick="fracAction('to')">と</div>
+                <div class="btn btn-orange label-jp" onclick="fracAction('bunnno')">分の</div>
+                <div class="btn btn-orange label-jp" onclick="fracAction('shosuu')">分小</div>
+                <div class="btn btn-orange label-jp" onclick="fracAction('taikari')">帯仮</div>
+                <div class="btn btn-orange label-xs" onclick="fn('ran')">RAN#</div>
+            </div>
 
-            <!-- 3段目 (MC-M+の段) -->
+            <!-- 3段目: ここから数字ボタンとの兼ね合いでレイアウト調整 -->
             <div class="btn btn-dark" onclick="backspace()">▶</div>
             <div class="btn btn-blue label-xs" onclick="mem('mc')">MC</div>
             <div class="btn btn-blue label-xs" onclick="mem('mr')">MR</div>
             <div class="btn btn-blue label-xs" onclick="mem('m-')">M-</div>
             <div class="btn btn-grey" onclick="op('/')">÷</div>
 
-            <!-- 4段目 -->
+            <!-- 4段目: 7, 8, 9 -->
             <div class="btn btn-blue label-xs" onclick="mem('m+')">M+</div>
             <div class="btn btn-dark" onclick="num(7)">7</div>
             <div class="btn btn-dark" onclick="num(8)">8</div>
             <div class="btn btn-dark" onclick="num(9)">9</div>
             <div class="btn btn-grey" onclick="op('*')">×</div>
 
-            <!-- 5段目 -->
+            <!-- 5段目: 4, 5, 6 -->
             <div class="btn btn-grey" onclick="fn('perc')">%</div>
             <div class="btn btn-dark" onclick="num(4)">4</div>
             <div class="btn btn-dark" onclick="num(5)">5</div>
             <div class="btn btn-dark" onclick="num(6)">6</div>
             <div class="btn btn-grey" onclick="op('-')">-</div>
 
-            <!-- 6段目 -->
-            <div class="btn btn-red" onclick="clearEntry()">C</div>
+            <!-- 6段目: 1, 2, 3 -->
+            <div class="btn btn-grey" onclick="fn('sqrt')">√</div>
             <div class="btn btn-dark" onclick="num(1)">1</div>
             <div class="btn btn-dark" onclick="num(2)">2</div>
             <div class="btn btn-dark" onclick="num(3)">3</div>
             <div class="btn btn-grey" onclick="op('+')">+</div>
 
-            <!-- 7段目 -->
+            <!-- 7段目: AC, 0, . , = -->
+            <div class="btn btn-red" onclick="clearEntry()">C</div>
             <div class="btn btn-ac" onclick="allClear()">AC</div>
             <div class="btn btn-dark" onclick="num(0)">0</div>
             <div class="btn btn-dark" onclick="num('.')">.</div>
-            <div class="btn btn-grey span-2" onclick="calculate()">=</div>
+            <div class="btn btn-grey" onclick="calculate()">=</div>
         </div>
     </div>
 
@@ -434,6 +448,13 @@
             if (type === 'inv') currentInput = (1 / val).toString();
             if (type === 'pi') currentInput = Math.PI.toString();
             if (type === 'pm') currentInput = (val * -1).toString();
+            if (type === 'ran') currentInput = Math.random().toString();
+            if (type === 'pow') {
+                 // シンプルな実装として、次の入力との累乗を想定（本来は演算子として扱うべきですが、ここでは簡易的に）
+                 operation = 'pow';
+                 prevInput = currentInput;
+                 shouldReset = true;
+            }
             currentInput = currentInput.substring(0, 10);
             updateDisplay();
         }
