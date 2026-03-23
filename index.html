@@ -1,465 +1,278 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CASIO AZ-90J Digital</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CASIO AZ-90J 完全版</title>
 
-        :root {
-            --bg-color: #1e2021;
-            --lcd-bg: #b8c2a9;
-            --orange-btn: #c98e3d;
-            --blue-btn: #6a9696;
-            --grey-btn: #4a4c4e;
-            --dark-grey-btn: #323436;
-            --red-btn: #a34d3d;
-            --ac-btn: #8c4235;
-        }
+<script src="https://cdn.tailwindcss.com"></script>
 
-        body {
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
+<style>
+body{
+    background:#000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+    font-family:sans-serif;
+}
 
-        .calculator {
-            width: 320px;
-            height: 570px;
-            background-color: var(--bg-color);
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            user-select: none;
-            border: 1px solid #111;
-        }
+.calc{
+    width:320px;
+    background:#1e2021;
+    padding:15px;
+    border-radius:12px;
+}
 
-        .top-panel {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            padding: 0 5px;
-        }
+.display{
+    background:#b8c2a9;
+    height:80px;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    font-size:28px;
+    padding:10px;
+    font-family:monospace;
+}
 
-        .brand-info { color: white; line-height: 1; }
-        .brand-name { font-weight: 800; font-size: 1.2rem; letter-spacing: 0.5px; }
-        .study-cal-tag {
-            font-size: 0.6rem;
-            background-color: #3b7a7a;
-            padding: 1px 4px;
-            font-style: italic;
-            border-radius: 1px;
-            margin-top: 4px;
-            display: inline-block;
-            color: #d1eeee;
-        }
-        .model-num { font-size: 0.55rem; color: #888; margin-top: 3px; }
+.grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:6px;
+}
 
-        .solar-area {
-            width: 100px;
-            height: 34px;
-            background: #111;
-            border: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .solar-cells { width: 85%; height: 60%; background: linear-gradient(90deg, #221111 0%, #331a1a 50%, #221111 100%); display: flex; gap: 2px; }
-        .solar-cell { flex: 1; border-right: 1px solid #111; }
-        .solar-text { font-size: 0.4rem; color: #665; letter-spacing: 0.5px; margin-top: 2px; }
+button{
+    height:40px;
+    border-radius:6px;
+    color:white;
+}
 
-        .display-frame { background-color: #0c0d0d; padding: 12px; border-radius: 6px; }
-        .lcd-screen {
-            background-color: var(--lcd-bg);
-            height: 85px;
-            border-radius: 3px;
-            box-shadow: inset 3px 3px 8px rgba(0,0,0,0.4);
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 5px 35px 5px 10px;
-            position: relative;
-            overflow: hidden;
-            font-family: 'Orbitron', sans-serif;
-            color: #1a1d16;
-        }
-
-        .lcd-indicators {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 0.75rem;
-            opacity: 0.9;
-            display: flex;
-            flex-direction: column;
-            line-height: 1.1;
-            font-weight: bold;
-        }
-
-        .lcd-main-val { 
-            font-size: 3rem;
-            letter-spacing: -2px;
-            line-height: 1;
-            text-align: right;
-        }
-
-        .fraction-layout {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            text-align: right;
-        }
-        .frac-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-left: 6px;
-        }
-        .frac-line {
-            width: 120%;
-            height: 3px;
-            background-color: #1a1d16;
-            margin: 2px 0;
-        }
-        .frac-num, .frac-den { 
-            font-size: 1.2rem; 
-            min-width: 20px; 
-            text-align: center; 
-            line-height: 1;
-        }
-        .frac-whole { font-size: 3rem; margin-right: 6px; }
-
-        .op-symbol {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.6rem;
-            font-weight: bold;
-            width: 20px;
-            text-align: center;
-        }
-
-        /* 5列グリッドで構成し、中央の数字列を調整 */
-        .grid-container { 
-            display: grid; 
-            grid-template-columns: repeat(5, 1fr); 
-            gap: 8px 6px; 
-            flex-grow: 1; 
-        }
-
-        .btn {
-            height: 38px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            box-shadow: 0 2px 0 #000;
-            transition: transform 0.05s, box-shadow 0.05s;
-        }
-        .btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #000; }
-        .btn-orange { background-color: var(--orange-btn); }
-        .btn-blue { background-color: var(--blue-btn); }
-        .btn-grey { background-color: var(--grey-btn); }
-        .btn-dark { background-color: var(--dark-grey-btn); font-size: 1.1rem; }
-        .btn-red { background-color: var(--red-btn); }
-        .btn-ac { background-color: var(--ac-btn); }
-
-        .label-jp { font-size: 0.65rem; letter-spacing: -0.5px; font-weight: bold; }
-        .label-xs { font-size: 0.55rem; }
-        
-        /* 数字ボタンの横幅を調整するためのヘルパークラス */
-        .col-span-1 { grid-column: span 1; }
-        .col-span-2 { grid-column: span 2; }
-        
-        /* 1段目と2段目（上部のオレンジボタン群）は等間隔に配置するため、個別に定義 */
-        .top-row { grid-column: span 5; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
-
-    </style>
+.dark{background:#323436;}
+.grey{background:#4a4c4e;}
+.orange{background:#c98e3d;}
+.red{background:#a34d3d;}
+.ac{background:#8c4235;}
+.blue{background:#6a9696;}
+</style>
 </head>
+
 <body>
 
-    <div class="calculator">
-        <div class="top-panel">
-            <div class="brand-info">
-                <div class="brand-name">CASIO</div>
-                <div class="study-cal-tag">STUDY CAL</div>
-                <div class="model-num">AZ-90J</div>
-            </div>
-            <div class="solar-area">
-                <div class="solar-cells">
-                    <div class="solar-cell"></div><div class="solar-cell"></div><div class="solar-cell"></div><div class="solar-cell"></div>
-                </div>
-                <div class="solar-text">TWO WAY POWER</div>
-            </div>
-        </div>
+<div class="calc">
+    <div id="display" class="display">0</div>
 
-        <div class="display-frame">
-            <div class="lcd-screen" id="lcd">
-                <!-- JS描画 -->
-            </div>
-        </div>
+    <div class="grid">
+        <button class="orange" onclick="fn('inv')">1/x</button>
+        <button class="orange" onclick="fn('sq')">x²</button>
+        <button class="orange" onclick="num('(')">(</button>
+        <button class="orange" onclick="num(')')">)</button>
+        <button class="orange" onclick="fn('pow')">x^y</button>
 
-        <!-- 5列をベースに調整 -->
-        <div class="grid-container">
-            <!-- 1段目: 6個並ぶので個別のコンテナ -->
-            <div class="top-row">
-                <div class="btn btn-orange label-xs" onclick="fn('inv')">1/x</div>
-                <div class="btn btn-orange label-xs" onclick="fn('sq')">x²</div>
-                <div class="btn btn-orange" onclick="num('(')">(</div>
-                <div class="btn btn-orange" onclick="num(')')">)</div>
-                <div class="btn btn-orange label-xs" onclick="fn('pow')">x<sup>y</sup></div>
-                <div class="btn btn-orange" onclick="fn('pi')">π</div>
-            </div>
+        <button class="orange" onclick="fn('pi')">π</button>
+        <button class="orange" onclick="fn('pm')">±</button>
+        <button class="orange" onclick="fracAction('to')">と</button>
+        <button class="orange" onclick="fracAction('bunnno')">分の</button>
+        <button class="orange" onclick="fracAction('shosuu')">小数</button>
 
-            <!-- 2段目: 同上 -->
-            <div class="top-row">
-                <div class="btn btn-orange label-xs" onclick="fn('pm')">+/-</div>
-                <div class="btn btn-orange label-jp" onclick="fracAction('to')">と</div>
-                <div class="btn btn-orange label-jp" onclick="fracAction('bunnno')">分の</div>
-                <div class="btn btn-orange label-jp" onclick="fracAction('shosuu')">分小</div>
-                <div class="btn btn-orange label-jp" onclick="fracAction('taikari')">帯仮</div>
-                <div class="btn btn-orange label-xs" onclick="fn('ran')">RAN#</div>
-            </div>
+        <button class="dark" onclick="backspace()">←</button>
+        <button class="blue" onclick="mem('mc')">MC</button>
+        <button class="blue" onclick="mem('mr')">MR</button>
+        <button class="blue" onclick="mem('m-')">M-</button>
+        <button class="grey" onclick="op('/')">÷</button>
 
-            <!-- 3段目: ここから数字ボタンとの兼ね合いでレイアウト調整 -->
-            <div class="btn btn-dark" onclick="backspace()">▶</div>
-            <div class="btn btn-blue label-xs" onclick="mem('mc')">MC</div>
-            <div class="btn btn-blue label-xs" onclick="mem('mr')">MR</div>
-            <div class="btn btn-blue label-xs" onclick="mem('m-')">M-</div>
-            <div class="btn btn-grey" onclick="op('/')">÷</div>
+        <button class="blue" onclick="mem('m+')">M+</button>
+        <button class="dark" onclick="num(7)">7</button>
+        <button class="dark" onclick="num(8)">8</button>
+        <button class="dark" onclick="num(9)">9</button>
+        <button class="grey" onclick="op('*')">×</button>
 
-            <!-- 4段目: 7, 8, 9 -->
-            <div class="btn btn-blue label-xs" onclick="mem('m+')">M+</div>
-            <div class="btn btn-dark" onclick="num(7)">7</div>
-            <div class="btn btn-dark" onclick="num(8)">8</div>
-            <div class="btn btn-dark" onclick="num(9)">9</div>
-            <div class="btn btn-grey" onclick="op('*')">×</div>
+        <button class="grey" onclick="fn('perc')">%</button>
+        <button class="dark" onclick="num(4)">4</button>
+        <button class="dark" onclick="num(5)">5</button>
+        <button class="dark" onclick="num(6)">6</button>
+        <button class="grey" onclick="op('-')">-</button>
 
-            <!-- 5段目: 4, 5, 6 -->
-            <div class="btn btn-grey" onclick="fn('perc')">%</div>
-            <div class="btn btn-dark" onclick="num(4)">4</div>
-            <div class="btn btn-dark" onclick="num(5)">5</div>
-            <div class="btn btn-dark" onclick="num(6)">6</div>
-            <div class="btn btn-grey" onclick="op('-')">-</div>
+        <button class="grey" onclick="fn('sqrt')">√</button>
+        <button class="dark" onclick="num(1)">1</button>
+        <button class="dark" onclick="num(2)">2</button>
+        <button class="dark" onclick="num(3)">3</button>
+        <button class="grey" onclick="op('+')">+</button>
 
-            <!-- 6段目: 1, 2, 3 -->
-            <div class="btn btn-grey" onclick="fn('sqrt')">√</div>
-            <div class="btn btn-dark" onclick="num(1)">1</div>
-            <div class="btn btn-dark" onclick="num(2)">2</div>
-            <div class="btn btn-dark" onclick="num(3)">3</div>
-            <div class="btn btn-grey" onclick="op('+')">+</div>
-
-            <!-- 7段目: AC, 0, . , = -->
-            <div class="btn btn-red" onclick="clearEntry()">C</div>
-            <div class="btn btn-ac" onclick="allClear()">AC</div>
-            <div class="btn btn-dark" onclick="num(0)">0</div>
-            <div class="btn btn-dark" onclick="num('.')">.</div>
-            <div class="btn btn-grey" onclick="calculate()">=</div>
-        </div>
+        <button class="red" onclick="clearEntry()">C</button>
+        <button class="ac" onclick="allClear()">AC</button>
+        <button class="dark" onclick="num(0)">0</button>
+        <button class="dark" onclick="num('.')">.</button>
+        <button class="grey" onclick="calculate()">=</button>
     </div>
+</div>
 
-    <script>
-        const lcd = document.getElementById('lcd');
+<script>
 
-        let currentInput = "0";
-        let prevInput = "";
-        let operation = null;
-        let shouldReset = false;
-        let memory = 0;
+// ===== 状態 =====
+let currentInput="0";
+let prevInput="";
+let operation=null;
+let shouldReset=false;
+let memory=0;
 
-        let fraction = {
-            whole: "",
-            numerator: "",
-            denominator: "",
-            active: "none"
-        };
+let fraction={
+    whole:"",
+    numerator:"",
+    denominator:"",
+    active:"none"
+};
 
-        function updateDisplay() {
-            let html = `
-                <div class="lcd-indicators">
-                    <span style="visibility: ${memory !== 0 ? 'visible' : 'hidden'}">M</span>
-                    <span>K</span>
-                </div>
-            `;
+// ===== 表示 =====
+function formatNumber(num){
+    if(!isFinite(num)) return "ERROR";
+    if(Math.abs(num)<1e-10) return "0";
+    return parseFloat(num.toPrecision(10)).toString();
+}
 
-            if (fraction.active !== "none" || fraction.denominator || fraction.numerator || fraction.whole) {
-                html += `
-                    <div class="fraction-layout">
-                        <div class="frac-whole">${fraction.whole || (fraction.active === 'none' ? '' : (fraction.active === 'whole' ? currentInput : ''))}</div>
-                        ${(fraction.numerator || fraction.active === 'numerator' || fraction.denominator || fraction.active === 'denominator') ? `
-                        <div class="frac-group">
-                            <div class="frac-num">${fraction.numerator || (fraction.active === 'numerator' ? currentInput : '') || '&nbsp;'}</div>
-                            <div class="frac-line"></div>
-                            <div class="frac-den">${fraction.denominator || (fraction.active === 'denominator' ? currentInput : '') || '&nbsp;'}</div>
-                        </div>` : ''}
-                    </div>
-                `;
-            } else {
-                html += `<div class="lcd-main-val">${currentInput}</div>`;
+function update(){
+    document.getElementById("display").innerText=currentInput;
+}
+
+// ===== 入力 =====
+function num(n){
+    if(shouldReset){
+        currentInput=n.toString();
+        shouldReset=false;
+    }else{
+        if(n==="." && currentInput.includes(".")) return;
+        if(currentInput==="0" && n!==".") currentInput=n.toString();
+        else currentInput+=n;
+    }
+    update();
+}
+
+function backspace(){
+    currentInput=currentInput.length>1?currentInput.slice(0,-1):"0";
+    update();
+}
+
+// ===== 分数 =====
+function fracAction(type){
+    switch(type){
+        case "to":
+            fraction.whole=currentInput;
+            fraction.active="numerator";
+            currentInput="";
+            break;
+
+        case "bunnno":
+            if(fraction.active==="numerator"){
+                fraction.numerator=currentInput;
+                fraction.active="denominator";
+                currentInput="";
             }
+            break;
 
-            if (operation) {
-                const symbols = {'/': '÷', '*': '×', '+': '+', '-': '-'};
-                html += `<div class="op-symbol">${symbols[operation]}</div>`;
-            }
-
-            lcd.innerHTML = html;
-        }
-
-        function num(n) {
-            if (shouldReset) {
-                currentInput = n.toString();
-                shouldReset = false;
-            } else {
-                if (currentInput === "0") currentInput = n.toString();
-                else if (currentInput.length < 10) currentInput += n.toString();
-            }
-            updateDisplay();
-        }
-
-        function backspace() {
-            if (currentInput.length > 1) {
-                currentInput = currentInput.slice(0, -1);
-            } else {
-                currentInput = "0";
-            }
-            updateDisplay();
-        }
-
-        function fracAction(type) {
-            if (type === 'bunnno') {
-                if (fraction.active === "none") {
-                    fraction.denominator = currentInput;
-                    fraction.active = "numerator";
-                    currentInput = "";
-                }
-            } else if (type === 'to') {
-                fraction.whole = currentInput;
-                currentInput = "";
-                fraction.active = "none"; 
-            } else if (type === 'shosuu') {
-                const val = getFractionValue();
-                allClear();
-                currentInput = val.toString().substring(0, 10);
-            } else if (type === 'taikari') {
-                if (fraction.whole && (fraction.numerator || currentInput) && fraction.denominator) {
-                    const w = parseInt(fraction.whole) || 0;
-                    const n = parseInt(fraction.numerator || currentInput) || 0;
-                    const d = parseInt(fraction.denominator) || 1;
-                    fraction.numerator = (w * d + n).toString();
-                    fraction.whole = "";
-                    currentInput = "";
-                }
-            }
-            updateDisplay();
-        }
-
-        function getFractionValue() {
-            let activeVal = parseFloat(currentInput) || 0;
-            let w = fraction.whole ? parseFloat(fraction.whole) : 0;
-            let n = fraction.numerator ? parseFloat(fraction.numerator) : 0;
-            let d = fraction.denominator ? parseFloat(fraction.denominator) : 1;
-
-            if (fraction.active === 'numerator') n = activeVal;
-            if (fraction.active === 'denominator') d = activeVal;
-            
-            if (d === 0) return 0;
-            return w + (n / d);
-        }
-
-        function op(o) {
-            if (fraction.active !== "none" || fraction.denominator) {
-                currentInput = getFractionValue().toString();
-                resetFraction();
-            }
-            if (operation && !shouldReset) calculate();
-            prevInput = currentInput;
-            operation = o;
-            shouldReset = true;
-            updateDisplay();
-        }
-
-        function calculate() {
-            let val = (fraction.active !== "none" || fraction.denominator) ? getFractionValue() : parseFloat(currentInput);
-            let prev = parseFloat(prevInput);
-            let result;
-
-            if (!operation) return;
-
-            switch(operation) {
-                case '+': result = prev + val; break;
-                case '-': result = prev - val; break;
-                case '*': result = prev * val; break;
-                case '/': result = prev / val; break;
-            }
-
-            currentInput = result.toString().substring(0, 10);
+        case "shosuu":
+            currentInput=formatNumber(getFraction());
             resetFraction();
-            operation = null;
-            shouldReset = true;
-            updateDisplay();
-        }
+            break;
+    }
+    update();
+}
 
-        function mem(type) {
-            let val = parseFloat(currentInput);
-            if (type === 'm+') memory += val;
-            if (type === 'm-') memory -= val;
-            if (type === 'mr') { currentInput = memory.toString(); shouldReset = true; resetFraction(); }
-            if (type === 'mc') memory = 0;
-            updateDisplay();
-        }
+function getFraction(){
+    let w=parseFloat(fraction.whole)||0;
+    let n=parseFloat(fraction.numerator)||0;
+    let d=parseFloat(currentInput)||1;
+    if(d===0) return Infinity;
+    return w+n/d;
+}
 
-        function allClear() {
-            currentInput = "0"; prevInput = ""; operation = null; resetFraction();
-            updateDisplay();
-        }
+function resetFraction(){
+    fraction={whole:"",numerator:"",denominator:"",active:"none"};
+}
 
-        function clearEntry() {
-            currentInput = "0";
-            updateDisplay();
-        }
+// ===== 演算 =====
+function op(o){
+    if(operation && !shouldReset) calculate();
+    prevInput=currentInput;
+    operation=o;
+    shouldReset=true;
+}
 
-        function resetFraction() {
-            fraction = { whole: "", numerator: "", denominator: "", active: "none" };
-        }
+function calculate(){
+    let a=parseFloat(prevInput);
+    let b=parseFloat(currentInput);
+    let r;
 
-        function fn(type) {
-            let val = parseFloat(currentInput);
-            if (type === 'sq') currentInput = (val * val).toString();
-            if (type === 'sqrt') currentInput = Math.sqrt(val).toString();
-            if (type === 'inv') currentInput = (1 / val).toString();
-            if (type === 'pi') currentInput = Math.PI.toString();
-            if (type === 'pm') currentInput = (val * -1).toString();
-            if (type === 'ran') currentInput = Math.random().toString();
-            if (type === 'pow') {
-                 // シンプルな実装として、次の入力との累乗を想定（本来は演算子として扱うべきですが、ここでは簡易的に）
-                 operation = 'pow';
-                 prevInput = currentInput;
-                 shouldReset = true;
-            }
-            currentInput = currentInput.substring(0, 10);
-            updateDisplay();
-        }
+    switch(operation){
+        case "+": r=a+b; break;
+        case "-": r=a-b; break;
+        case "*": r=a*b; break;
+        case "/": r=(b===0)?Infinity:a/b; break;
+        case "pow": r=Math.pow(a,b); break;
+        default:return;
+    }
 
-        updateDisplay();
-    </script>
+    currentInput=formatNumber(r);
+    operation=null;
+    shouldReset=true;
+    update();
+}
+
+// ===== メモリ =====
+function mem(type){
+    let v=parseFloat(currentInput)||0;
+    if(type==="m+") memory+=v;
+    if(type==="m-") memory-=v;
+    if(type==="mr"){
+        currentInput=formatNumber(memory);
+        shouldReset=true;
+    }
+    if(type==="mc") memory=0;
+    update();
+}
+
+// ===== クリア =====
+function allClear(){
+    currentInput="0";
+    prevInput="";
+    operation=null;
+    shouldReset=false;
+    resetFraction();
+    update();
+}
+
+function clearEntry(){
+    currentInput="0";
+    update();
+}
+
+// ===== 関数 =====
+function fn(type){
+    let v=parseFloat(currentInput)||0;
+
+    switch(type){
+        case "sq": currentInput=formatNumber(v*v); break;
+        case "sqrt": currentInput=v<0?"ERROR":formatNumber(Math.sqrt(v)); break;
+        case "inv": currentInput=v===0?"ERROR":formatNumber(1/v); break;
+        case "pi":
+            currentInput="3.141592653";
+            shouldReset=true;
+            break;
+        case "pm": currentInput=formatNumber(-v); break;
+        case "pow":
+            operation="pow";
+            prevInput=currentInput;
+            shouldReset=true;
+            break;
+    }
+
+    update();
+}
+
+// 初期表示
+update();
+
+</script>
+
 </body>
 </html>
