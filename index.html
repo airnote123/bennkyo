@@ -1,259 +1,264 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CASIO AZ-90J Digital</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
-
-        :root {
-            --bg-color: #1e2021;
-            --lcd-bg: #b8c2a9;
-            --orange-btn: #c98e3d;
-            --blue-btn: #6a9696;
-            --grey-btn: #4a4c4e;
-            --dark-grey-btn: #323436;
-            --red-btn: #a34d3d;
-            --ac-btn: #8c4235;
-        }
-
-        body {
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-
-        .calculator {
-            width: 320px;
-            height: 570px;
-            background-color: var(--bg-color);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .lcd-screen {
-            background-color: var(--lcd-bg);
-            height: 85px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            padding: 10px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 2.5rem;
-        }
-
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            flex-grow: 1;
-        }
-
-        .btn {
-            height: 38px;
-            border-radius: 6px;
-            color: white;
-        }
-
-        .btn-orange { background-color: var(--orange-btn); }
-        .btn-blue { background-color: var(--blue-btn); }
-        .btn-grey { background-color: var(--grey-btn); }
-        .btn-dark { background-color: var(--dark-grey-btn); }
-        .btn-red { background-color: var(--red-btn); }
-        .btn-ac { background-color: var(--ac-btn); }
-    </style>
-</head>
-
-<body>
-
-<div class="calculator">
-    <div id="lcd" class="lcd-screen">0</div>
-
-    <div class="grid-container">
-        <button class="btn btn-orange" onclick="fn('inv')">1/x</button>
-        <button class="btn btn-orange" onclick="fn('sq')">x²</button>
-        <button class="btn btn-orange" onclick="num('(')">(</button>
-        <button class="btn btn-orange" onclick="num(')')">)</button>
-        <button class="btn btn-orange" onclick="fn('pow')">x^y</button>
-
-        <button class="btn btn-orange" onclick="fn('pi')">π</button>
-        <button class="btn btn-orange" onclick="fn('pm')">±</button>
-        <button class="btn btn-orange" onclick="fracAction('to')">と</button>
-        <button class="btn btn-orange" onclick="fracAction('bunnno')">分の</button>
-        <button class="btn btn-orange" onclick="fracAction('shosuu')">小</button>
-
-        <button class="btn btn-dark" onclick="backspace()">←</button>
-        <button class="btn btn-blue" onclick="mem('mc')">MC</button>
-        <button class="btn btn-blue" onclick="mem('mr')">MR</button>
-        <button class="btn btn-blue" onclick="mem('m-')">M-</button>
-        <button class="btn btn-grey" onclick="op('/')">÷</button>
-
-        <button class="btn btn-blue" onclick="mem('m+')">M+</button>
-        <button class="btn btn-dark" onclick="num(7)">7</button>
-        <button class="btn btn-dark" onclick="num(8)">8</button>
-        <button class="btn btn-dark" onclick="num(9)">9</button>
-        <button class="btn btn-grey" onclick="op('*')">×</button>
-
-        <button class="btn btn-grey" onclick="fn('perc')">%</button>
-        <button class="btn btn-dark" onclick="num(4)">4</button>
-        <button class="btn btn-dark" onclick="num(5)">5</button>
-        <button class="btn btn-dark" onclick="num(6)">6</button>
-        <button class="btn btn-grey" onclick="op('-')">-</button>
-
-        <button class="btn btn-grey" onclick="fn('sqrt')">√</button>
-        <button class="btn btn-dark" onclick="num(1)">1</button>
-        <button class="btn btn-dark" onclick="num(2)">2</button>
-        <button class="btn btn-dark" onclick="num(3)">3</button>
-        <button class="btn btn-grey" onclick="op('+')">+</button>
-
-        <button class="btn btn-red" onclick="clearEntry()">C</button>
-        <button class="btn btn-ac" onclick="allClear()">AC</button>
-        <button class="btn btn-dark" onclick="num(0)">0</button>
-        <button class="btn btn-dark" onclick="num('.')">.</button>
-        <button class="btn btn-grey" onclick="calculate()">=</button>
-    </div>
-</div>
-
 <script>
-// ===== 状態 =====
-let currentInput="0";
-let prevInput="";
-let operation=null;
-let shouldReset=false;
-let memory=0;
+        const lcd = document.getElementById('lcd');
 
-let fraction={whole:"",numerator:"",denominator:"",active:"none"};
+        let currentInput = "0";
+        let prevInput = "";
+        let operation = null;
+        let shouldReset = false;
+        let memory = 0;
 
-// ===== フォーマット =====
-function formatNumber(num){
-    if(!isFinite(num)) return "ERROR";
-    if(Math.abs(num)<1e-10) return "0";
-    return parseFloat(num.toPrecision(10)).toString();
-}
+        let fractionData = {
+            whole: null,
+            denominator: null,
+            numerator: null,
+            isEntryMode: false
+        };
 
-// ===== 表示 =====
-function updateDisplay(){
-    document.getElementById("lcd").innerText=currentInput;
-}
+        function updateDisplay() {
+            let html = `
+                <div class="lcd-indicators">
+                    <span style="visibility: ${memory !== 0 ? 'visible' : 'hidden'}">M</span>
+                </div>
+            `;
 
-// ===== 入力 =====
-function num(n){
-    if(shouldReset){
-        currentInput=n.toString();
-        shouldReset=false;
-    }else{
-        if(n==="." && currentInput.includes(".")) return;
-        if(currentInput==="0" && n!==".") currentInput=n.toString();
-        else currentInput+=n;
-    }
-    updateDisplay();
-}
+            // 分数表示の判定: 入力モード中、または分母が確定している場合
+            if (fractionData.isEntryMode || fractionData.denominator !== null) {
+                let w = fractionData.whole;
+                let d = fractionData.denominator;
+                
+                // 「分の」を押す前は今の入力が「分母」、押した後は「分子」
+                let displayDen = (d === null) ? currentInput : d;
+                let displayNum = (d === null) ? "" : currentInput;
 
-function backspace(){
-    currentInput=currentInput.length>1?currentInput.slice(0,-1):"0";
-    updateDisplay();
-}
+                html += `
+                    <div class="fraction-display">
+                        ${w !== null ? `<div class="frac-whole">${w}</div>` : ''}
+                        <div class="frac-stack">
+                            <div class="frac-num">${displayNum || '&nbsp;'}</div>
+                            <div class="frac-line"></div>
+                            <div class="frac-den">${displayDen || '0'}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // 通常表示（πや計算結果など）
+                html += `<div class="lcd-main-val">${currentInput}</div>`;
+            }
 
-// ===== 分数 =====
-function fracAction(type){
-    if(type==="shosuu"){
-        currentInput=formatNumber(getFraction());
-        resetFraction();
-    }
-    updateDisplay();
-}
+            if (operation && operation !== 'pow') {
+                const symbols = {'/': '÷', '*': '×', '+': '+', '-': '-'};
+                html += `<div class="op-symbol">${symbols[operation]}</div>`;
+            }
 
-function getFraction(){return 0;}
-function resetFraction(){fraction={};}
+            lcd.innerHTML = html;
+        }
 
-// ===== 演算 =====
-function op(o){
-    if(operation && !shouldReset) calculate();
-    prevInput=currentInput;
-    operation=o;
-    shouldReset=true;
-}
+        function num(n) {
+            if (shouldReset) {
+                currentInput = "";
+                shouldReset = false;
+            }
 
-function calculate(){
-    let a=parseFloat(prevInput);
-    let b=parseFloat(currentInput);
-    let r;
+            if (n === '.') {
+                if (currentInput.includes('.')) return;
+                if (currentInput === "" || currentInput === "0") currentInput = "0.";
+                else currentInput += ".";
+            } else {
+                if (currentInput === "0") currentInput = n.toString();
+                else if (currentInput.length < 10) currentInput += n.toString();
+            }
+            updateDisplay();
+        }
 
-    switch(operation){
-        case "+": r=a+b; break;
-        case "-": r=a-b; break;
-        case "*": r=a*b; break;
-        case "/": r=(b===0)?Infinity:a/b; break;
-        case "pow": r=Math.pow(a,b); break;
-    }
+        function backspace() {
+            if (currentInput.length > 1) {
+                currentInput = currentInput.slice(0, -1);
+            } else {
+                currentInput = "0";
+            }
+            updateDisplay();
+        }
 
-    currentInput=formatNumber(r);
-    operation=null;
-    shouldReset=true;
-    updateDisplay();
-}
+        function fracAction(type) {
+            if (type === 'to') {
+                fractionData.whole = currentInput;
+                currentInput = "0";
+                fractionData.isEntryMode = true;
+                shouldReset = false;
+            } else if (type === 'bunnno') {
+                fractionData.denominator = currentInput;
+                currentInput = "0";
+                fractionData.isEntryMode = true;
+                shouldReset = false;
+            } else if (type === 'shosuu') {
+                if (fractionData.isEntryMode || fractionData.denominator !== null) {
+                    let val = getFractionNumericValue();
+                    resetFractionState();
+                    currentInput = formatNumber(val);
+                } else {
+                    decimalToFraction(parseFloat(currentInput));
+                }
+                shouldReset = true;
+            } else if (type === 'taikari') {
+                if (fractionData.whole !== null && fractionData.denominator !== null) {
+                    let w = parseInt(fractionData.whole);
+                    let d = parseInt(fractionData.denominator);
+                    let n = parseInt(currentInput);
+                    currentInput = (w * d + n).toString();
+                    fractionData.whole = null;
+                } else if (fractionData.whole === null && fractionData.denominator !== null) {
+                    let n = parseInt(currentInput);
+                    let d = parseInt(fractionData.denominator);
+                    if (d !== 0 && n >= d) {
+                        fractionData.whole = Math.floor(n / d).toString();
+                        currentInput = (n % d).toString();
+                    }
+                }
+            }
+            updateDisplay();
+        }
 
-// ===== メモリ =====
-function mem(type){
-    let v=parseFloat(currentInput)||0;
-    if(type==="m+") memory+=v;
-    if(type==="m-") memory-=v;
-    if(type==="mr"){
-        currentInput=formatNumber(memory);
-        shouldReset=true;
-    }
-    if(type==="mc") memory=0;
-    updateDisplay();
-}
+        function getFractionNumericValue() {
+            let w = fractionData.whole !== null ? parseFloat(fractionData.whole) : 0;
+            let d = fractionData.denominator !== null ? parseFloat(fractionData.denominator) : 1;
+            let n = parseFloat(currentInput);
+            return w + (n / (d === 0 ? 1 : d));
+        }
 
-// ===== クリア =====
-function allClear(){
-    currentInput="0";
-    prevInput="";
-    operation=null;
-    shouldReset=false;
-    updateDisplay();
-}
+        function formatNumber(num) {
+            if (isNaN(num)) return "Error";
+            if (!isFinite(num)) return "Error";
+            let s = num.toString();
+            if (s.length > 10) s = num.toPrecision(9).toString();
+            return s.substring(0, 10);
+        }
 
-function clearEntry(){
-    currentInput="0";
-    updateDisplay();
-}
+        function decimalToFraction(val) {
+            const eps = 1.0E-9;
+            let x = Math.abs(val);
+            let whole = Math.floor(x);
+            x -= whole;
+            
+            if (x < eps) {
+                fractionData.whole = (val < 0 ? "-" : "") + whole.toString();
+                fractionData.denominator = "1";
+                currentInput = "0";
+            } else {
+                let p1 = 1, q1 = 0, p2 = Math.floor(x), q2 = 1;
+                let r = x - p2;
+                while (r > eps && q2 < 1000) {
+                    let a = Math.floor(1.0 / r);
+                    r = 1.0 / r - a;
+                    let nextP = a * p2 + p1;
+                    let nextQ = a * q2 + q1;
+                    if (nextQ > 1000) break;
+                    p1 = p2; p2 = nextP;
+                    q1 = q2; q2 = nextQ;
+                }
+                fractionData.whole = whole > 0 ? (val < 0 ? "-" : "") + whole.toString() : (val < 0 ? "-" : null);
+                fractionData.denominator = q2.toString();
+                currentInput = p2.toString();
+            }
+            fractionData.isEntryMode = true;
+        }
 
-// ===== 関数 =====
-function fn(type){
-    let v=parseFloat(currentInput)||0;
+        function op(o) {
+            let val = getActiveValue();
+            if (operation && !shouldReset) calculate();
+            prevInput = val.toString();
+            operation = o;
+            shouldReset = true;
+            resetFractionState();
+            updateDisplay();
+        }
 
-    switch(type){
-        case "sq": currentInput=formatNumber(v*v); break;
-        case "sqrt": currentInput=v<0?"ERROR":formatNumber(Math.sqrt(v)); break;
-        case "inv": currentInput=v===0?"ERROR":formatNumber(1/v); break;
-        case "pi":
-            currentInput="3.141592653";
-            shouldReset=true;
-            break;
-        case "pm": currentInput=formatNumber(-v); break;
-        case "pow":
-            operation="pow";
-            prevInput=currentInput;
-            shouldReset=true;
-            break;
-    }
+        function getActiveValue() {
+            if (fractionData.isEntryMode || fractionData.denominator !== null) {
+                return getFractionNumericValue();
+            }
+            return parseFloat(currentInput);
+        }
 
-    updateDisplay();
-}
+        function calculate() {
+            if (!operation) return;
+            let v1 = parseFloat(prevInput);
+            let v2 = getActiveValue();
+            let result;
 
-updateDisplay();
-</script>
+            switch(operation) {
+                case '+': result = v1 + v2; break;
+                case '-': result = v1 - v2; break;
+                case '*': result = v1 * v2; break;
+                case '/': result = v1 / v2; break;
+                case 'pow': result = Math.pow(v1, v2); break;
+            }
 
-</body>
-</html>
+            currentInput = formatNumber(result);
+            resetFractionState();
+            operation = null;
+            shouldReset = true;
+            updateDisplay();
+        }
+
+        function mem(type) {
+            let val = getActiveValue();
+            if (type === 'm+') memory += val;
+            if (type === 'm-') memory -= val;
+            if (type === 'mr') { 
+                currentInput = formatNumber(memory);
+                shouldReset = true; 
+                resetFractionState();
+            }
+            if (type === 'mc') memory = 0;
+            updateDisplay();
+        }
+
+        function allClear() {
+            currentInput = "0"; prevInput = ""; operation = null; 
+            resetFractionState();
+            updateDisplay();
+        }
+
+        function clearEntry() {
+            currentInput = "0";
+            updateDisplay();
+        }
+
+        function resetFractionState() {
+            fractionData = { whole: null, denominator: null, numerator: null, isEntryMode: false };
+        }
+
+        function fn(type) {
+            let val = getActiveValue();
+            if (type === 'sq') { currentInput = formatNumber(val * val); resetFractionState(); }
+            if (type === 'sqrt') { currentInput = formatNumber(Math.sqrt(val)); resetFractionState(); }
+            if (type === 'inv') { currentInput = formatNumber(1 / val); resetFractionState(); }
+            if (type === 'pi') { 
+                resetFractionState(); // 分数モードを解除
+                currentInput = "3.14159265"; 
+                shouldReset = true; 
+            }
+            if (type === 'pm') {
+                if (fractionData.isEntryMode) {
+                    if (fractionData.whole) {
+                        fractionData.whole = (parseFloat(fractionData.whole) * -1).toString();
+                    } else {
+                        currentInput = (parseFloat(currentInput) * -1).toString();
+                    }
+                } else {
+                    currentInput = formatNumber(val * -1);
+                }
+            }
+            if (type === 'ran') { currentInput = Math.random().toFixed(3).toString(); resetFractionState(); }
+            if (type === 'perc') { currentInput = formatNumber(val / 100); resetFractionState(); }
+            if (type === 'pow') {
+                 operation = 'pow';
+                 prevInput = val.toString();
+                 shouldReset = true;
+                 resetFractionState();
+            }
+            updateDisplay();
+        }
+
+        updateDisplay();
+    </script>
